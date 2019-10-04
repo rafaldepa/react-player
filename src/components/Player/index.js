@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import Timeline from './Timeline';
 import Volume from './Volume';
@@ -14,7 +14,8 @@ const StyledPlayer = styled.div`
     @import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
 
     position: relative;
-    display: block;
+    display: flex;
+    align-items: center;
     width: 100%;
     height: auto;
     font-family: 'Roboto', sans-serif;
@@ -97,6 +98,29 @@ const StyledIconButton = styled.button`
     :focus { outline: none }    
 `;
 
+const StyledSkipper = styled.div`
+    position: absolute;    
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    line-height: 0;
+    color: #fff;
+    background: rgba(0,0,0,0.85);
+    
+    width: 100px;
+    height: 100px;
+
+    ${props => props.side == 'left' && css`
+        left: -100%;
+        border-radius: 0 50% 50% 0;
+    `}
+    ${props => props.side == 'right' && css`
+        right: -100%;
+        border-radius: 50% 0 0 50%;
+    `}
+`
+
 const StyledTime = styled.div`
     display: inline-block;
     font-size: .9em;
@@ -109,9 +133,10 @@ class ReactPlayer extends Component {
         super(props);
 
         this.state = {
+            source: props.src,
             theme: {
                 accent: props.colorAccent ? props.colorAccent : '#73fcff',
-                background: props.colorBackground ? props.colorBackground : '#323232'
+                background: props.colorBackground ? props.colorBackground : '#030303'
             },
 
             isPlaying: false,
@@ -130,11 +155,11 @@ class ReactPlayer extends Component {
     }
 
     componentDidMount = () => {
+        const player = document.querySelector("#reactPlayer video");
+        player.addEventListener('dblclick', this.fullscreenVideo);
+        
         setInterval(this.analyzeVideo, 1);
         setInterval(this.updateTime, 1);
-
-
-        console.log(this.state)
     }
 
     toggleControls = () => {
@@ -176,6 +201,11 @@ class ReactPlayer extends Component {
         }
     }
 
+    updateVolume = e => {
+        this.refs.video.volume = e;
+        this.setState({ volume: e });
+    }
+
     playVideo = () => {
         this.refs.video.play();
         this.setState({ isPlaying: true });        
@@ -187,7 +217,7 @@ class ReactPlayer extends Component {
     }
 
     muteVideo = () => {
-        this.refs.video.volume = (this.state.isMuted === true) ? 0 : this.state.volume;
+        this.refs.video.volume = (this.state.isMuted === true) ? this.state.volume : 0;
         this.setState({ isMuted: !this.state.isMuted });
     }
 
@@ -208,6 +238,29 @@ class ReactPlayer extends Component {
         return `${mins}:${secs}`;
     }
 
+    skipVideo = event => {
+        const rect = event.target.getBoundingClientRect();
+        const element_width = rect.width;
+        const element_x = event.clientX - rect.x;
+        const time = this.state.time;
+
+        console.log(rect)
+
+        if(element_x < element_width/2) {
+            this.setState({
+                time: {
+                    current: time.current-10
+                }
+            })
+        } else {
+            this.setState({
+                time: {
+                    current: time.current+10
+                }
+            })
+        }
+    }
+
     setTime = time => {
         this.refs.video.currentTime = time;
     }
@@ -215,8 +268,10 @@ class ReactPlayer extends Component {
     render() {
         return(
             <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls} background={this.state.theme.background}>
-                <StyledVideo ref="video" src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4" onContextMenu={e => e.preventDefault()}>Your browser does not support the video tag.</StyledVideo>
+                <StyledVideo ref="video" src={this.state.source} onContextMenu={e => e.preventDefault()} onDoubleClick={e => this.skipVideo(e)}>Your browser does not support the video tag.</StyledVideo>
                 {this.state.loading && <StyledLoader accent={this.state.theme.accent} />}
+                <StyledSkipper side="left">&laquo;</StyledSkipper>
+                <StyledSkipper side="right">&raquo;</StyledSkipper>
                 <StyledControls visible={(this.state.showControls && this.state.allowControls) ? true : false }>
                     <Timeline {...this.state.time} updateTime={time => this.setTime(time)} accent={this.state.theme.accent} />
                     <StyledControlsContent>
@@ -225,7 +280,7 @@ class ReactPlayer extends Component {
                                 ? <StyledIconButton icon={IconPause} onClick={this.pauseVideo.bind(this)} />
                                 : <StyledIconButton icon={IconPlay} onClick={this.playVideo.bind(this)} />
                             }
-                            <Volume vol={this.state.volume} onClick={() => this.muteVideo} />
+                            <Volume vol={this.state.volume} toggleMute={this.muteVideo} updateVolume={e => this.updateVolume(e)} />
                             <StyledTime>{this.formatTime(this.state.time.current)} / {this.formatTime(this.state.time.total)}</StyledTime>
                         </StyledControlsGroup>
                         <StyledControlsGroup>

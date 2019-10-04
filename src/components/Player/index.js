@@ -2,18 +2,23 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import Timeline from './Timeline';
+import Volume from './Volume';
 
 import IconPlay from '../../images/icon-play.svg';
 import IconPause from '../../images/icon-pause.svg';
 import IconFullscreen from '../../images/icon-fullscreen.svg';
 
-import testvideo from '../../video/test-720.mp4';
+import testvideo from '../../video/mov_bbb.mp4';
 
 const StyledPlayer = styled.div`
+    @import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
+
     position: relative;
     display: block;
     width: 100%;
     height: auto;
+    font-family: 'Roboto', sans-serif;
+    font-size: 15px;
     background: #323232;
     overflow: hidden;
 `;
@@ -85,16 +90,16 @@ const StyledIconButton = styled.button`
     padding: 0;
     line-height: 0;
     font-size: 0;
-    margin: 0 10px 0 0;
+    margin: 0 15px 0 0;
     cursor: pointer;
 
     :last-child { margin: 0; }
-
     :focus { outline: none }    
 `;
 
 const StyledTime = styled.div`
     display: inline-block;
+    font-size: .9em;
     margin: 0 10px;
     color: #fff;
 `;
@@ -105,22 +110,43 @@ class ReactPlayer extends Component {
 
         this.state = {
             isPlaying: false,
-            loading: false,
+            isMuted: false,
+            volume: 0.5,
+            loading: true,
+            allowControls: false,
             showControls: false,
 
             time: {
                 current: 0,
-                total: 100
+                total: 0
             }
         }
     }
 
     componentDidMount = () => {
+        setInterval(this.analyzeVideo, 1);
         setInterval(this.updateTime, 1);
     }
 
     toggleControls = () => {
         this.setState({ showControls: !this.state.showControls });
+    }
+
+    analyzeVideo = () => {
+        const video = this.refs.video;
+
+        if(video.readyState === 4) {
+            this.setState({ 
+                loading: false,
+                allowControls: true,
+                time: {
+                    current: this.refs.video.currentTime,
+                    total: this.refs.video.duration
+                }
+            });            
+        } else {
+            this.setState({ loading: true });
+        }
     }
 
     updateTime = () => {
@@ -131,7 +157,14 @@ class ReactPlayer extends Component {
                     total: this.refs.video.duration
                 }
             })
-        }        
+        }   
+    
+        // Pause at the end
+        if(this.state.time.current === this.state.time.total) {
+            this.setState({
+                isPlaying: false
+            })
+        }
     }
 
     playVideo = () => {
@@ -144,25 +177,36 @@ class ReactPlayer extends Component {
         this.setState({ isPlaying: false });
     }
 
+    muteVideo = () => {
+        this.refs.video.volume = (this.state.isMuted === true) ? 0 : this.state.volume;
+        this.setState({ isMuted: !this.state.isMuted });
+    }
+
     formatTime = time => {
-        console.log(time)
         const mins = String(Math.floor(time / 60)).padStart(2, "0");
-        const secs = String(Math.floor(time & 60)).padStart(2, "0");
+        const secs = String(Math.floor(time % 60)).padStart(2, "0");
         
         return `${mins}:${secs}`;
+    }
+
+    setTime = time => {
+        this.refs.video.currentTime = time;
     }
 
     render() {
         return(
             <StyledPlayer onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls}>
-                <StyledVideo ref="video" src={testvideo}>Your browser does not support the video tag.</StyledVideo>
+                <StyledVideo ref="video" src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4" onContextMenu={e => e.preventDefault()}>Your browser does not support the video tag.</StyledVideo>
                 {this.state.loading && <StyledLoader />}
-                <StyledControls visible={this.state.showControls}>
-                    <Timeline {...this.state.time} />
+                <StyledControls visible={(this.state.showControls && this.state.allowControls) ? true : false }>
+                    <Timeline {...this.state.time} updateTime={time => this.setTime(time)} />
                     <StyledControlsContent>
                         <StyledControlsGroup>
-                            <StyledIconButton icon={IconPlay} onClick={this.playVideo.bind(this)} />
-                            <StyledIconButton icon={IconPause} onClick={this.pauseVideo.bind(this)} />
+                            {this.state.isPlaying
+                                ? <StyledIconButton icon={IconPause} onClick={this.pauseVideo.bind(this)} />
+                                : <StyledIconButton icon={IconPlay} onClick={this.playVideo.bind(this)} />
+                            }
+                            <Volume vol={this.state.volume} onClick={() => this.muteVideo} />
                             <StyledTime>{this.formatTime(this.state.time.current)} / {this.formatTime(this.state.time.total)}</StyledTime>
                         </StyledControlsGroup>
                         <StyledControlsGroup>

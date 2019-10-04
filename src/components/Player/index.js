@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 
 import Timeline from './Timeline';
+
+import IconPlay from '../../images/icon-play.svg';
+import IconPause from '../../images/icon-pause.svg';
+import IconFullscreen from '../../images/icon-fullscreen.svg';
+
 import testvideo from '../../video/test-720.mp4';
 
 const StyledPlayer = styled.div`
@@ -22,8 +27,7 @@ const StyledControls = styled.div`
     position: absolute;
     bottom: -44px;
     left: 0;
-    display: flex;    
-    flex-flow: row wrap;
+    display: block;
     width: 100%;    
     background: rgba(0, 0, 0, 0.85);
     z-index: 2;
@@ -33,10 +37,18 @@ const StyledControls = styled.div`
 
 const StyledControlsContent = styled.div`
     display: flex;
-    justify-content: space-between;
+    widht: 100%;
+    justify-content: space-between;    
     align-items: center;
+    flex-flow: row wrap;
     height: 44px;
-    padding: 0 10px;
+    padding: 0 15px;
+`;
+
+const StyledControlsGroup = styled.div`
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
 `;
 
 const StyledLoader = styled.div`
@@ -60,7 +72,29 @@ const StyledLoader = styled.div`
     }
 `;
 
+const StyledIconButton = styled.button`
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-image: url(${props => props.icon && props.icon});
+    background-size: 100%;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    transition: .2s transform ease;
+    border: 0;
+    padding: 0;
+    line-height: 0;
+    font-size: 0;
+    margin: 0 10px 0 0;
+    cursor: pointer;
+
+    :last-child { margin: 0; }
+
+    :focus { outline: none }    
+`;
+
 const StyledTime = styled.div`
+    display: inline-block;
     margin: 0 10px;
     color: #fff;
 `;
@@ -111,6 +145,7 @@ class ReactPlayer extends Component {
     }
 
     formatTime = time => {
+        console.log(time)
         const mins = String(Math.floor(time / 60)).padStart(2, "0");
         const secs = String(Math.floor(time & 60)).padStart(2, "0");
         
@@ -125,10 +160,14 @@ class ReactPlayer extends Component {
                 <StyledControls visible={this.state.showControls}>
                     <Timeline {...this.state.time} />
                     <StyledControlsContent>
-                        <button onClick={this.playVideo.bind(this)}>PLAY</button>
-                        <button onClick={this.pauseVideo.bind(this)}>PAUSE</button>
-                        <button onClick={this.updateTime}>UPDATE</button>
-                        <StyledTime>{this.formatTime(this.state.time.current)} / {this.formatTime(this.state.time.total)}</StyledTime>
+                        <StyledControlsGroup>
+                            <StyledIconButton icon={IconPlay} onClick={this.playVideo.bind(this)} />
+                            <StyledIconButton icon={IconPause} onClick={this.pauseVideo.bind(this)} />
+                            <StyledTime>{this.formatTime(this.state.time.current)} / {this.formatTime(this.state.time.total)}</StyledTime>
+                        </StyledControlsGroup>
+                        <StyledControlsGroup>
+                            <StyledIconButton icon={IconFullscreen} onClick={this.fullscreenVideo} />
+                        </StyledControlsGroup>
                     </StyledControlsContent>                 
                 </StyledControls>
             </StyledPlayer>  

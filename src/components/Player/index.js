@@ -8,7 +8,8 @@ import {
     StyledLoader,
     StyledIconButton,
     StyledSkipper,  
-    StyledTime
+    StyledTime,
+    StyledError
 } from './index.style';
 
 import Timeline from './Timeline';
@@ -33,6 +34,7 @@ class ReactPlayer extends Component {
             isPlaying: false,
             isMuted: false,
             isFullscreen: false,
+            isError: false,
             volume: 0.75,
             loading: true,
             allowControls: false,
@@ -69,6 +71,8 @@ class ReactPlayer extends Component {
                     total: this.refs.video.duration
                 }
             });            
+        } else if(video.readyState === 0) {
+            this.setState({ isError: true });
         } else {
             this.setState({ loading: true });
         }
@@ -157,6 +161,7 @@ class ReactPlayer extends Component {
     render() {
         return(
             <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls} background={this.state.theme.background}>
+                {this.state.isError && <StyledError background={this.state.theme.background}>An error occured. Please try again later.</StyledError>}             
                 <StyledVideo ref="video" src={this.state.source} onContextMenu={e => e.preventDefault()} onDoubleClick={e => this.skipVideo(e)}>Your browser does not support the video tag.</StyledVideo>
                 {this.state.loading && <StyledLoader accent={this.state.theme.accent} />}
                 <StyledSkipper side="left">&laquo;</StyledSkipper>

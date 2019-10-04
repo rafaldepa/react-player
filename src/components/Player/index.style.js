@@ -117,3 +117,19 @@ export const StyledTime = styled.div`
     margin: 0 10px;
     color: #fff;
 `;
+
+export const StyledError = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-flow: row wrap;
+    text-align: center;
+    color: #fff;
+    background: ${props => props.background && props.background };
+    z-index: 2;
+`

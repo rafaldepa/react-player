@@ -66,13 +66,12 @@ class ReactPlayer extends Component {
             this.setState({ 
                 loading: false,
                 allowControls: true,
+                isError: false,
                 time: {
                     current: this.refs.video.currentTime,
                     total: this.refs.video.duration
                 }
             });            
-        } else if(video.readyState === 0) {
-            this.setState({ isError: true });
         } else {
             this.setState({ loading: true });
         }
@@ -126,6 +125,13 @@ class ReactPlayer extends Component {
         this.setState({ isFullscreen: !this.state.isFullscreen });
     }
 
+    videoError = () => {
+        this.setState({
+            isLoading: false,
+            isError: true
+        })
+    }
+
     formatTime = time => {
         const mins = String(Math.floor(time / 60)).padStart(2, "0");
         const secs = String(Math.floor(time % 60)).padStart(2, "0");
@@ -162,7 +168,7 @@ class ReactPlayer extends Component {
         return(
             <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls} background={this.state.theme.background}>
                 {this.state.isError && <StyledError background={this.state.theme.background}>An error occured. Please try again later.</StyledError>}             
-                <StyledVideo ref="video" src={this.state.source} onContextMenu={e => e.preventDefault()} onDoubleClick={e => this.skipVideo(e)}>Your browser does not support the video tag.</StyledVideo>
+                <StyledVideo ref="video" src={this.state.source} onError={e => this.videoError(e)} onContextMenu={e => e.preventDefault()} onDoubleClick={e => this.skipVideo(e)}>Your browser does not support the video tag.</StyledVideo>
                 {this.state.loading && <StyledLoader accent={this.state.theme.accent} />}
                 <StyledSkipper side="left">&laquo;</StyledSkipper>
                 <StyledSkipper side="right">&raquo;</StyledSkipper>

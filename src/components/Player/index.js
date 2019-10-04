@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
-import styled, { css } from 'styled-components';
+import { 
+    StyledPlayer, 
+    StyledVideo, 
+    StyledControls, 
+    StyledControlsContent,
+    StyledControlsGroup,
+    StyledLoader,
+    StyledIconButton,
+    StyledSkipper,  
+    StyledTime
+} from './index.style';
 
 import Timeline from './Timeline';
 import Volume from './Volume';
@@ -8,125 +18,7 @@ import IconPlay from '../../images/icon-play.svg';
 import IconPause from '../../images/icon-pause.svg';
 import IconFullscreen from '../../images/icon-fullscreen.svg';
 
-import testvideo from '../../video/mov_bbb.mp4';
-
-const StyledPlayer = styled.div`
-    @import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
-
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: auto;
-    font-family: 'Roboto', sans-serif;
-    font-size: 15px;
-    background: ${props => props.background && props.background};
-    overflow: hidden;
-`;
-
-const StyledVideo = styled.video`
-    display: block;
-    width: 100%;
-`;
-
-const StyledControls = styled.div`
-    position: absolute;
-    bottom: -44px;
-    left: 0;
-    display: block;
-    width: 100%;    
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 2;
-    transform: translatey(${props => props.visible ? "-44px" : "0"});
-    transition: .2s transform ease-in-out;
-`;
-
-const StyledControlsContent = styled.div`
-    display: flex;
-    widht: 100%;
-    justify-content: space-between;    
-    align-items: center;
-    flex-flow: row wrap;
-    height: 44px;
-    padding: 0 15px;
-`;
-
-const StyledControlsGroup = styled.div`
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-`;
-
-const StyledLoader = styled.div`
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: 60px;
-    width: 60px;
-    margin-left: -30px;
-    margin-top: -30px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 50%;
-    border: 2px solid rgba(0, 0, 0, 0.4);
-    border-top-color: ${props => props.accent && props.accent};
-    animation: spinner 600ms linear infinite;
-
-    @keyframes spinner {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-`;
-
-const StyledIconButton = styled.button`
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    background-image: url(${props => props.icon && props.icon});
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-color: transparent;
-    transition: .2s transform ease;
-    border: 0;
-    padding: 0;
-    line-height: 0;
-    font-size: 0;
-    margin: 0 15px 0 0;
-    cursor: pointer;
-
-    :last-child { margin: 0; }
-    :focus { outline: none }    
-`;
-
-const StyledSkipper = styled.div`
-    position: absolute;    
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2em;
-    line-height: 0;
-    color: #fff;
-    background: rgba(0,0,0,0.85);
-    
-    width: 100px;
-    height: 100px;
-
-    ${props => props.side == 'left' && css`
-        left: -100%;
-        border-radius: 0 50% 50% 0;
-    `}
-    ${props => props.side == 'right' && css`
-        right: -100%;
-        border-radius: 50% 0 0 50%;
-    `}
-`
-
-const StyledTime = styled.div`
-    display: inline-block;
-    font-size: .9em;
-    margin: 0 10px;
-    color: #fff;
-`;
+// import testvideo from '../../video/mov_bbb.mp4';
 
 class ReactPlayer extends Component {
     constructor(props) {
@@ -138,15 +30,13 @@ class ReactPlayer extends Component {
                 accent: props.colorAccent ? props.colorAccent : '#73fcff',
                 background: props.colorBackground ? props.colorBackground : '#030303'
             },
-
             isPlaying: false,
             isMuted: false,
             isFullscreen: false,
-            volume: 0.5,
+            volume: 0.75,
             loading: true,
             allowControls: false,
             showControls: false,
-
             time: {
                 current: 0,
                 total: 0
@@ -156,8 +46,9 @@ class ReactPlayer extends Component {
 
     componentDidMount = () => {
         const player = document.querySelector("#reactPlayer video");
+        player.volume = this.state.volume;
         player.addEventListener('dblclick', this.fullscreenVideo);
-        
+
         setInterval(this.analyzeVideo, 1);
         setInterval(this.updateTime, 1);
     }
@@ -243,8 +134,6 @@ class ReactPlayer extends Component {
         const element_width = rect.width;
         const element_x = event.clientX - rect.x;
         const time = this.state.time;
-
-        console.log(rect)
 
         if(element_x < element_width/2) {
             this.setState({

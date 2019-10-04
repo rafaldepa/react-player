@@ -111,6 +111,7 @@ class ReactPlayer extends Component {
         this.state = {
             isPlaying: false,
             isMuted: false,
+            isFullscreen: false,
             volume: 0.5,
             loading: true,
             allowControls: false,
@@ -182,6 +183,16 @@ class ReactPlayer extends Component {
         this.setState({ isMuted: !this.state.isMuted });
     }
 
+    fullscreenVideo = () => {
+        if(this.state.isFullscreen) {
+            document.exitFullscreen();
+        } else {
+            const element = document.querySelector("#reactPlayer");
+            element.webkitRequestFullScreen();
+        }        
+        this.setState({ isFullscreen: !this.state.isFullscreen });
+    }
+
     formatTime = time => {
         const mins = String(Math.floor(time / 60)).padStart(2, "0");
         const secs = String(Math.floor(time % 60)).padStart(2, "0");
@@ -195,7 +206,7 @@ class ReactPlayer extends Component {
 
     render() {
         return(
-            <StyledPlayer onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls}>
+            <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls}>
                 <StyledVideo ref="video" src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4" onContextMenu={e => e.preventDefault()}>Your browser does not support the video tag.</StyledVideo>
                 {this.state.loading && <StyledLoader />}
                 <StyledControls visible={(this.state.showControls && this.state.allowControls) ? true : false }>

@@ -19,7 +19,7 @@ const StyledPlayer = styled.div`
     height: auto;
     font-family: 'Roboto', sans-serif;
     font-size: 15px;
-    background: #323232;
+    background: ${props => props.background && props.background};
     overflow: hidden;
 `;
 
@@ -67,7 +67,7 @@ const StyledLoader = styled.div`
     background: rgba(0, 0, 0, 0.2);
     border-radius: 50%;
     border: 2px solid rgba(0, 0, 0, 0.4);
-    border-top-color: #73fcff;
+    border-top-color: ${props => props.accent && props.accent};
     animation: spinner 600ms linear infinite;
 
     @keyframes spinner {
@@ -109,6 +109,11 @@ class ReactPlayer extends Component {
         super(props);
 
         this.state = {
+            theme: {
+                accent: props.colorAccent ? props.colorAccent : '#73fcff',
+                background: props.colorBackground ? props.colorBackground : '#323232'
+            },
+
             isPlaying: false,
             isMuted: false,
             isFullscreen: false,
@@ -127,6 +132,9 @@ class ReactPlayer extends Component {
     componentDidMount = () => {
         setInterval(this.analyzeVideo, 1);
         setInterval(this.updateTime, 1);
+
+
+        console.log(this.state)
     }
 
     toggleControls = () => {
@@ -206,11 +214,11 @@ class ReactPlayer extends Component {
 
     render() {
         return(
-            <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls}>
+            <StyledPlayer id="reactPlayer" onMouseEnter={this.toggleControls} onMouseLeave={this.toggleControls} background={this.state.theme.background}>
                 <StyledVideo ref="video" src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4" onContextMenu={e => e.preventDefault()}>Your browser does not support the video tag.</StyledVideo>
-                {this.state.loading && <StyledLoader />}
+                {this.state.loading && <StyledLoader accent={this.state.theme.accent} />}
                 <StyledControls visible={(this.state.showControls && this.state.allowControls) ? true : false }>
-                    <Timeline {...this.state.time} updateTime={time => this.setTime(time)} />
+                    <Timeline {...this.state.time} updateTime={time => this.setTime(time)} accent={this.state.theme.accent} />
                     <StyledControlsContent>
                         <StyledControlsGroup>
                             {this.state.isPlaying

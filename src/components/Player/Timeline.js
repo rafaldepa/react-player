@@ -36,7 +36,7 @@ const StyledProgress = styled.div.attrs(props => ({
     width: 100%;
     height: 100%;
     left: -100%;
-    background: #73fcff;
+    background: ${props => props.accent && props.accent};
     
     transition: 0.1s transform ease;
     pointer-events: none;
@@ -68,7 +68,7 @@ class Timeline extends Component {
     render() {
         return(
             <StyledTimeline onClick={e => this.updateTime(e)}>
-                <StyledProgress time={this.getProgress()} />
+                <StyledProgress time={this.getProgress()} accent={this.props.accent} />
                 {/* <StyledBullet time={this.getProgress()} /> */}
             </StyledTimeline>
         )

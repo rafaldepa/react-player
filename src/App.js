@@ -25,7 +25,9 @@ function App() {
   return (
     <StyledWrapper>
       <StyledWrapperContent>
-        <ReactPlayer />
+        <ReactPlayer 
+          colorAccent="#0ecec9"
+        />
       </StyledWrapperContent>      
     </StyledWrapper>
   );
